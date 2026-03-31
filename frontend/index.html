@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Milk Tracker</title>
+        <link rel="stylesheet" href="/static/style.css">
+    </head>
+    <body>
+        <h1>Milk Delivery Tracking app</h1>
+        <h2>Vendor</h2>
+        Enter vendor id to fetch details: 
+        <form id="vendor_form" onsubmit="fetch_vendor(event)">
+            <input type="text" name="vendor_id" id="vendor_id">
+            <button type=submit>Fetch</button>
+        </form>
+        <div id="vendordata">
+        </div>
+<script type="text/javascript">
+
+function fetch_vendor(event) {
+    event.preventDefault()
+    const vendor_id = document.getElementById("vendor_id").value
+    fetch(`/api/vendors/${vendor_id}`)
+        .then(response => response.json())
+        .then(vendor_data => {
+            const output = `${JSON.stringify(vendor_data)}`
+            document.getElementById("vendordata").innerHTML = output
+        })
+}
+</script>
+    </body>
+</html>
