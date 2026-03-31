@@ -1,31 +1,68 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Milk Tracker</title>
-        <link rel="stylesheet" href="/static/style.css">
+        <link rel="stylesheet" href="style.css">
     </head>
     <body>
-        <h1>Milk Delivery Tracking app</h1>
-        <h2>Vendor</h2>
-        Enter vendor id to fetch details: 
-        <form id="vendor_form" onsubmit="fetch_vendor(event)">
-            <input type="text" name="vendor_id" id="vendor_id">
-            <button type=submit>Fetch</button>
-        </form>
-        <div id="vendordata">
+        <div class="container">
+            <h1>Milk Delivery Tracking</h1>
+            <p>Enter your vendor ID to view delivery details</p>
+            
+            <form id="vendor_form" onsubmit="fetch_vendor(event)">
+                <input type="text" name="vendor_id" id="vendor_id" placeholder="Enter Vendor ID (e.g., 1)">
+                <button type="submit">Fetch Details</button>
+            </form>
+            
+            <div id="vendordata"></div>
         </div>
-<script type="text/javascript">
 
-function fetch_vendor(event) {
-    event.preventDefault()
-    const vendor_id = document.getElementById("vendor_id").value
-    fetch(`/api/vendors/${vendor_id}`)
-        .then(response => response.json())
-        .then(vendor_data => {
-            const output = `${JSON.stringify(vendor_data)}`
-            document.getElementById("vendordata").innerHTML = output
-        })
-}
-</script>
+        <script type="text/javascript">
+            function fetch_vendor(event) {
+                event.preventDefault();
+                const vendorId = document.getElementById('vendor_id').value;
+                const dataDiv = document.getElementById('vendordata');
+                
+                if (!vendorId) {
+                    dataDiv.innerHTML = '<p style="color: #d63384; text-align: center;">Please enter a vendor ID</p>';
+                    return;
+                }
+                
+                dataDiv.innerHTML = '<p style="text-align: center; color: #6b3a50;">Loading...</p>';
+                
+                fetch(`/api/vendors/${vendorId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Vendor not found');
+                        }
+                        return response.json();
+                    })
+                    .then(vendor_data => {
+                        let html = '<div style="background: rgba(255,255,255,0.9); padding: 20px; border-radius: 16px;">';
+                        html += `<h3 style="color: #d63384; margin-bottom: 15px;">Vendor: ${vendor_data.name || 'N/A'}</h3>`;
+                        
+                        if (vendor_data.customers && vendor_data.customers.length > 0) {
+                            html += '<h4 style="color: #c1357a; margin: 15px 0 10px;">Customers:</h4>';
+                            html += '<ul style="list-style: none; padding: 0;">';
+                            vendor_data.customers.forEach(customer => {
+                                html += `<li style="background: #fff9fc; padding: 12px; margin: 8px 0; border-radius: 8px; border-left: 3px solid #d63384;">
+                                    <strong>${customer.name}</strong> - ${customer.address || 'No address'}
+                                </li>`;
+                            });
+                            html += '</ul>';
+                        } else {
+                            html += '<p style="color: #6b3a50;">No customers found</p>';
+                        }
+                        
+                        html += '</div>';
+                        dataDiv.innerHTML = html;
+                    })
+                    .catch(error => {
+                        dataDiv.innerHTML = `<p style="color: #d63384; text-align: center;">Error: ${error.message}</p>`;
+                    });
+            }
+        </script>
     </body>
 </html>
